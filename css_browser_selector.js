@@ -31,83 +31,95 @@ identifies
 */
 
 ;(function(u) {
-
 	var
-		// Most repeated keywords.
-		g = 'gecko',
-		w = 'webkit',
-		s = 'safari',
-		o = 'opera',
-		m = 'mobile',
-		h = document.documentElement,
-		parse = function(u) {
+		// `b` for Browser names, split using 0.
+		b = 'gecko0firefox0webkit0safari0chrome0opera0konqueror0mobile0blackberry0android0windows '.split(0),
+		// `s` for Space separator.
+		s = ' ',
+		// `v` for Version numbers, returned in an array.
+		v = function(n){
+			n = n.split('.');
+			return [n[0], n[0]+'_'+n[1][0]]
+		},
+		d = document.documentElement,
+		// `p` for Parse the ua.
+		p = function(u) {
 			var
 				// Navigator's User Agent, in lower caps.
 				ua = u.toLowerCase(),
 				// Function `is` returns `true` if value `t` is found on `ua`, returns `false` if not found.
-				is = function (t) {
-					return ua.indexOf(t) > -1
-				},
-				b = [
+				is = function(t){ return ~ua.search(t) },
+				br = [
 					// hat tip: https://github.com/kevingessner/css_browser_selector/
 					// via https://github.com/verbatim/css_browser_selector
-					(!(/opera|webtv/i.test(ua))&&/msie\s(\d)/.test(ua)) ? ('ie ie'+(/trident\/4\.0/.test(ua) ? '8' : RegExp.$1))
-					// Updated Firefox do output both "ff" and "firefox" classes
-					:(is('firefox/')&&/firefox\/(\S+)/.exec(ua)) ? (g + ' ff' + RegExp.$1.split('.')[0] + ' ff' + RegExp.$1.split('.')[0] + '_' + RegExp.$1.split('.')[1][0] + ' firefox' + RegExp.$1.split('.')[0] + ' firefox' + RegExp.$1.split('.')[0] + '_' + RegExp.$1.split('.')[1][0])
-					:is('gecko/') ? g
-					// Updated opera line to output major and minor versions
-					:(is('opera/')&&/version\/(\S+)/.exec(ua)) ? (o + ' ' + o + RegExp.$1.split('.')[0] + ' ' + o + RegExp.$1.split('.')[0] + '_' + RegExp.$1.split('.')[1][0])
-					:(/opera[\/|\s](\S+)/.exec(ua)) ? (o + ' ' + o + RegExp.$1.split('.')[0])
-					:is('konqueror') ? 'konqueror'
-					:is('blackberry') ? m + ' blackberry'
-					:is('android') ? m + ' android'
-					:is('chrome') ? w + ' chrome'
-					:is('iron') ? w + ' iron'
-					// Updated webkit line to output version number when available, only "webkit safari" when it's not.
-					:(is('applewebkit/')&&/version\/(\S+)/.exec(ua)) ? w + ' ' + s + ' ' + s + RegExp.$1.split('.')[0]
-					:is('applewebkit/') ? w + ' ' + s
-					:is('mozilla/') ? g : ''
+					(!(/opera|webtv/i.test(ua))&&/msie\s(\d)/.test(ua)) ? ('ie' + s + 'ie' + (/trident\/4\.0/.test(ua) ? '8' : RegExp.$1))
+					// Mozilla Firefox (Gecko)
+					//:(is(b[1]+'/') && /firefox\/(\S+)/.exec(ua)) ? b[0] + s + 'ff' + v(RegExp.$1)[0] + s + 'ff' + v(RegExp.$1)[1] + s + b[1] + v(RegExp.$1)[0] + s + b[1] + v(RegExp.$1)[1]
+					:(is(b[1]+'/') && /firefox\/(\S+)/.exec(ua) && (vv=v(RegExp.$1))) ? b[0] + s + 'ff' + vv[0] + s + 'ff' + vv[1] + s + b[1] + vv[0] + s + b[1] + vv[1]
+					// Gecko
+					:is(b[0]+'/') ? b[0]
+					// Opera Browser
+					:(is(b[5]+'/') && /version\/(\S+)/.exec(ua) && (vv=v(RegExp.$1))) ? b[5] + s + b[5] + vv[0] + s + b[5] + vv[1]
+					:(/opera[\/|\s](\S+)/.exec(ua)) ? b[5] + s + b[5] + v(RegExp.$1)[0]
+					// Konqueror
+					:is(b[6]) ? b[6]
+					// Mobile Blackberry
+					:is(b[8]) ? b[7] + s + b[8]
+					// Mobile Android
+					:is(b[9]) ? b[7] + s + b[9]
+					// Google Chrome (Webkit)
+					:is(b[4]) ? b[2] + s + b[4]
+					// Iron (Webkit)
+					:is('iron') ? b[2] + s + 'iron'
+					// Safari (Webkit)
+					:(is('applewebkit/') && /version\/(\S+)/.exec(ua)) ? b[2] + s + b[3] + s + b[3] + v(RegExp.$1)[0]
+					:is('applewebkit/') ? b[2] + s + b[3]
+					// Mozilla
+					:is('mozilla/') ? b[0] : ''
 				],
 				os = [
-					 is('j2me') ? m + ' j2me'
-					:is('iphone') ? m + ' iphone'
-					:is('ipod') ? m + ' ipod'
-					:is('ipad') ? m + ' ipad'
+					 is('j2me') ? b[7] + ' j2me'
+					:is('iphone') ? b[7] + ' iphone'
+					:is('ipod') ? b[7] + ' ipod'
+					:is('ipad') ? b[7] + ' ipad'
+					// Mac
 					:is('mac') ? 'mac'
 					:is('darwin') ? 'mac'
 					:is('webtv') ? 'webtv'
 					// hat tip: https://github.com/saar/css_browser_selector
 					// via https://github.com/verbatim/css_browser_selector
-					:is('win')?'win'+ (
-						 is('windows nt 6.2')?' win8'
-						:is('windows nt 6.1')?' win7'
-						:is('windows nt 6.0')?' vista'
-						:is('windows nt 5.2') || is('windows nt 5.1') ? ' xp'
-						:is('windows nt 5.0')?' win2k': ''
-					)
+					// Windows, now with versions
+					:is('win') ? (wv = 'win' + s + 'win_' + (
+						 is(b[10] + 'nt 6.2') ? '8'
+						:is(b[10] + 'nt 6.1') ? '7'
+						:is(b[10] + 'nt 6.0') ? 'vista'
+						:is(b[10] + 'nt 5.2') || is(b[10] + 'nt 5.1') ? 'xp'
+						:is(b[10] + 'nt 5.0') ? '2000'
+						:is('winnt') ? 'nt'
+						:(is(b[10]) && /windows[\s](\S+)/.exec(ua)) ? RegExp.$1.replace(/[\)\;]/g,'') : ''
+					)) ? (wv != 'win win_') ? wv : 'win' : ''
 					:is('freebsd') ? 'freebsd'
 					:(is('x11')||is('linux')) ? 'linux' : ''
 				],
-				js = ' js',
 				// Join all the browser info in one space-separated string.
-				c = b.join(' ') + ' ' + os.join(' ') + js;
+				cl = [br, os, 'js'].join(' ');
 			return {
-				'classes': c,
-				'browser': b,
-				'os': os
+				classes: cl,
+				browser: br,
+				os: os
 			};
-		}
+		};
 	// Keep external reference.
-	window.css_browser_selector = parse(u);
-	window.css_browser_selector.test = function(ua){
-		var parseua = parse(ua);
-		return parseua.classes
+	window.cssbs = p(u);
+	cssbs.test = function(ua){
+		var pua = p(ua);
+		return pua.classes
 	};
 	// Add string to (existing) html node class attribute.
 	// hat tip, paul irish: http://paulirish.com/2009/avoiding-the-fouc-v3/
 	// via https://github.com/verbatim/css_browser_selector
-	h.className = ( h.className.replace(/no-?js/g,"") + " " + css_browser_selector.classes ).replace(/^ /, "");
-	// Return string.
-	return window.css_browser_selector.classes;
+	d.className = ( d.className.replace(/no-?js/g,"") + s + cssbs.classes ).replace(/^ /, "");
+	// Return string with classes.
+	return cssbs.classes;
 
 }(navigator.userAgent));
