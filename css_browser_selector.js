@@ -62,10 +62,7 @@ identifies
 					// via https://github.com/verbatim/css_browser_selector
 					(!(/opera|webtv/i.test(ua))&&/msie\s(\d)/.test(ua)) ? ('ie' + s + 'ie' + (/trident\/4\.0/.test(ua) ? '8' : RegExp.$1))
 					// Mozilla Firefox (Gecko)
-					//:(is(b[1]+'/') && /firefox\/(\S+)/.exec(ua)) ? b[0] + s + 'ff' + v(RegExp.$1)[0] + s + 'ff' + v(RegExp.$1)[1] + s + b[1] + v(RegExp.$1)[0] + s + b[1] + v(RegExp.$1)[1]
-					:(is(b[1]+'/') && /firefox\/(\S+)/.exec(ua) && (vv=v(RegExp.$1))) ? b[0] + s + 'ff' + vv[0] + s + 'ff' + vv[1] + s + b[1] + vv[0] + s + b[1] + vv[1]
-					// Gecko
-					:is(b[0]+'/') ? b[0]
+					:(/gecko\/(\d+)\s(\w+)\/(\S+)/i.test(ua) && (nlc=RegExp.$2, vv=v(RegExp.$3))) ? b[0] + s + nlc + s + nlc + vv[0] + s + nlc + vv[1]
 					// Opera Browser
 					:(is(b[5]+'/') && /version\/(\S+)/.exec(ua) && (vv=v(RegExp.$1))) ? b[5] + s + b[5] + vv[0] + s + b[5] + vv[1]
 					:(/opera[\/|\s](\S+)/.exec(ua)) ? b[5] + s + b[5] + v(RegExp.$1)[0]
@@ -84,6 +81,7 @@ identifies
 					:is('applewebkit/') ? b[2] + s + b[3]
 					// Mozilla
 					:is('mozilla/') ? b[0] : ''
+					.toLowerCase()
 				,
 				os =
 					 is('j2me') ? b[7] + ' j2me'
@@ -127,7 +125,4 @@ identifies
 	// hat tip, paul irish: http://paulirish.com/2009/avoiding-the-fouc-v3/
 	// via https://github.com/verbatim/css_browser_selector
 	d.className = ( d.className.replace(/no-?js/g,"") + s + cssbs.classes ).replace(/^ /, "");
-	// Return string with classes.
-	return cssbs.classes;
-
 }(navigator.userAgent));
