@@ -8,10 +8,7 @@ Contributors: http://rafael.adm.br/css_browser_selector#contributors
 v0.5.0 (Oct 11, 2011)
 andrew relkin
 
-v0.6.0 (Oct 28, 2011)
-Gerson Goulart
-
-v0.7.0 (Nov 02, 2011)
+v0.6.0 (Oct 28, 2011) to v0.9.0 (Feb 10, 2012)
 Gerson Goulart
 
 Modified, now detects:
@@ -36,12 +33,23 @@ identifies
 		b = 'gecko0firefox0webkit0safari0chrome0opera0konqueror0mobile0blackberry0android0windows '.split(0),
 		// `s` for Space separator.
 		s = ' ',
+		d = document.documentElement,
 		// `v` for Version numbers, returned in an array.
 		v = function(n){
 			n = n.split('.');
 			return [n[0], n[0]+'_'+n[1][0]]
 		},
-		d = document.documentElement,
+		// `oc` for Object Convert, function to test for a value in javascript array (http://snook.ca/archives/javascript/testing_for_a_v).
+		oc = function(a) {
+			// `a` = array
+			// `o` = object
+			var o = {};
+			// For each item in the array, make it the key of an object with empty value.
+			for(var i=0;i<a.length;i++) {
+				o[a[i]]='';
+			}
+			return o;
+		},
 		// `p` for Parse the ua.
 		p = function(u) {
 			var
@@ -49,7 +57,7 @@ identifies
 				ua = u.toLowerCase(),
 				// Function `is` returns `true` if value `t` is found on `ua`, returns `false` if not found.
 				is = function(t){ return ~ua.search(t) },
-				br = [
+				br =
 					// hat tip: https://github.com/kevingessner/css_browser_selector/
 					// via https://github.com/verbatim/css_browser_selector
 					(!(/opera|webtv/i.test(ua))&&/msie\s(\d)/.test(ua)) ? ('ie' + s + 'ie' + (/trident\/4\.0/.test(ua) ? '8' : RegExp.$1))
@@ -76,8 +84,8 @@ identifies
 					:is('applewebkit/') ? b[2] + s + b[3]
 					// Mozilla
 					:is('mozilla/') ? b[0] : ''
-				],
-				os = [
+				,
+				os =
 					 is('j2me') ? b[7] + ' j2me'
 					:is('iphone') ? b[7] + ' iphone'
 					:is('ipod') ? b[7] + ' ipod'
@@ -100,13 +108,13 @@ identifies
 					)) ? (wv != 'win win_') ? wv : 'win' : ''
 					:is('freebsd') ? 'freebsd'
 					:(is('x11')||is('linux')) ? 'linux' : ''
-				],
+				,
 				// Join all the browser info in one space-separated string.
 				cl = [br, os, 'js'].join(' ');
 			return {
 				classes: cl,
-				browser: br,
-				os: os
+				browser: oc(br.split(' ')),
+				os: oc(os.split(' '))
 			};
 		};
 	// Keep external reference.
